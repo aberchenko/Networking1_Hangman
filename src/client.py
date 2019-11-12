@@ -43,21 +43,23 @@ class Connection:
                 self.sendMessage(letter)
 
     def getGuess(self):
-        letter = ''
+        finalLetter = ''
         foundLetter = False
         while not foundLetter:
             print("Letter to guess:", end=" ")
             letter = input()
             verifiedLetter = self.verifyLetter(letter)
+            debug("Verified Letter:", verifiedLetter)
             if verifiedLetter == '':
                 print("Error! Please guess one letter.")
             else:
                 if verifiedLetter in self.guesses:
                     print("Error! Letter", verifiedLetter, "has been guessed before, please guess another letter.")
                 else:
+                    finalLetter = verifiedLetter
                     foundLetter = True
 
-        return letter
+        return finalLetter
 
     def printWord(self, word):
         for letter in word:
