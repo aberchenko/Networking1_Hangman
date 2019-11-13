@@ -1,6 +1,7 @@
 # server.py
 
 from socket import *
+from signal import signal, SIGINT
 
 import sys
 import random
@@ -14,6 +15,8 @@ maxIncorrect = 6
 ip = '127.0.0.1'
 port = '9012'
 
+serverSocket = None
+
 maxConnections = 3
 connections = []
 
@@ -22,6 +25,15 @@ def debug(*messages):
         for message in messages:
             print(message, end=" ")
         print("")
+
+def closeHandler(signal_received, frame):
+    debug("Received close signal")
+    global serverSocket
+    serverSocket.close()
+    for connection in connections:
+        if connection != None:
+            connection.endConnection()
+    sys.exit(0)
 
 def readWords():
     try:
@@ -168,7 +180,10 @@ class Connection:
         debug("Connection ended")
 
 def server_loop():
+    global serverSocket
     serverSocket = socket(AF_INET, SOCK_STREAM)
+    signal(SIGINT, closeHandler)
+    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     serverSocket.bind((ip, int(port)))
     serverSocket.listen(1)
     debug('Server is listening')
@@ -198,7 +213,7 @@ if __name__ == '__main__':
                 ip = sys.argv[i]
             elif i == 3:
                 port = sys.argv[i]
-    
+
     readWords()
     initializeConnections()
 
